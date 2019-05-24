@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="5b317c74-b288-4382-9508-466f81c29b0e" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="077638ce-b13e-4f47-b851-e338dc9bf65c" defaultWriteEncoding="windows-1252">
+		<file:connection workingDir="C:\Users\bykkumar\Desktop\File" />
+	</file:config>
+	<flow name="cdata_exFlow" doc:id="4d303693-f9b4-47c2-a1ca-1cf23df89625" >
+		<http:listener doc:name="Listener" doc:id="751f2c8c-24b1-4bbc-966c-9a91dc8f2053" config-ref="HTTP_Listener_config" path="/cdata"/>
+		<ee:transform doc:name="Transform Message" doc:id="646ba24d-7fff-4ff7-83f3-19bcd938224c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+read(payload.Envelope.Body.process)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="44adf423-b00d-44d8-8107-d48a2651f584" message="#[payload]"/>
+	
+</flow>
+	<flow name="cdata_exFlow1" doc:id="74d75d14-786f-45f3-92bb-362f8f591b48" >
+		<http:listener doc:name="Listener" doc:id="bfd95703-f94c-47cb-8652-24e41a3fce80" config-ref="HTTP_Listener_config" path="/insertcdata"/>
+		<ee:transform doc:name="Transform Message" doc:id="8b80bdf7-f129-4917-af57-d6ce773792bc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[ %dw 2.0
+   output application/java
+   ---
+   write(payload, "application/json")]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="e8ff7fa7-185c-4d45-9f5d-754e37a8848d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://www.w3.org/2003/05/soap-envelope/
+ns ns01 http://welsforgo.com/
+---
+{
+	ns0#Envelope: {
+		ns0#Header: null,
+		ns0#Body: {
+			ns01#process: payload as CData
+		}
+	}
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="cdataFlow" doc:id="df7ceecb-5e3d-433e-8716-49204c375ab5" >
+		<http:listener doc:name="Listener" doc:id="c52e1789-3421-4f19-95e2-1821d90bce3d" config-ref="HTTP_Listener_config" path="/cdata2"/>
+		<ee:transform doc:name="Transform Message" doc:id="94482e8d-dfe3-4234-9444-633d57fedc95" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+
+	write(payload.Envelope,"application/xml")
+ ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="769d3293-3609-4846-abb4-ee9e62d1858f" message="#[payload]" />
+	</flow>
+	<flow name="cdataFlow1" doc:id="fa6e3a62-9030-44ac-ac34-713cc8b21303" >
+		<http:listener doc:name="Listener" doc:id="87e89fd8-3f10-4373-8b98-35e963f31e23" config-ref="HTTP_Listener_config" path="/string"/>
+		<ee:transform doc:name="Transform Message" doc:id="d0c19f2a-d7f3-4abb-a84b-4b97d10c058b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[ %dw 2.0
+  output application/xml
+   ---
+
+	 res:write(payload.^raw replace /([\-\,\n\t,&lt;])/ with "<" )
+  	]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="3fa5051d-8a2f-4c95-9f84-891419b39162" message="#[payload]" />
+	</flow>
+	<flow name="cdataFlow2" doc:id="93db7ad1-0fb1-43f1-9746-34b4b2ca078d" >
+		<http:listener doc:name="Listener" doc:id="76b49665-c05b-4464-ba37-d651f588ef94" config-ref="HTTP_Listener_config" path="/string2"/>
+		<ee:transform doc:name="Transform Message" doc:id="3b48f8b0-836c-4b0a-ac34-c7bb0ee66657" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+res:(write(payload,"application/xml"))]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="9db81c5d-e858-40ab-8cad-47f764355619" message='#[payload.res as String]'/>
+	</flow>
+	<flow name="cdataFlow3" doc:id="469de300-ea8d-4210-b64f-5d456afbb44f" >
+		<http:listener doc:name="Listener" doc:id="d02178fa-266e-4c8c-8c6e-91c5d773fd4e" config-ref="HTTP_Listener_config" path="/string3"/>
+		<ee:transform doc:name="Transform Message" doc:id="63cca63a-c1a5-43d4-b9eb-bd2255f941a4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="64eefb9e-f2ad-41bb-b82d-ff3e595ec0ae" message="#[payload]"/>
+		<file:write doc:name="Write" doc:id="356da146-b4c2-4482-b4ed-6a0f2aca1826" config-ref="File_Config" path="C:\Users\bykkumar\Desktop\File\file.txt" encoding="UTF-8">
+		</file:write>
+		<logger level="INFO" doc:name="Logger" doc:id="14cbf12d-91af-4cd6-8e9c-ec763329c63c" message="success" />
+		<file:read doc:name="Read" doc:id="7e47ba75-d33d-4d72-ae77-daf566dfe431" config-ref="File_Config" path="C:\Users\bykkumar\Desktop\File\file.txt" outputMimeType="text/plain" outputEncoding="UTF-8"/>
+		<logger level="INFO" doc:name="Logger" doc:id="560ba8c2-db16-4f08-a79a-66821665ffb9" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="d2423c3d-ffaf-4c34-8c01-158ab3bee863" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[ %dw 2.0
+ output application/xml encoding="UTF-8"
+ 
+   ---
+
+	 res:write(payload,"text/plain",{"encoding": "UTF-8"})
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="608d4f98-b1f7-4356-a1d8-ecb7cb1fe842" message="#[payload.res]"/>
+	</flow>
+	<flow name="cdataFlow4" doc:id="c4318613-5e7c-4142-95ce-3436ee302dc4" >
+		<http:listener doc:name="Listener" doc:id="52f0edc1-9803-47dd-93f0-ac8ff0d49e56" config-ref="HTTP_Listener_config" path="/string5"/>
+		<ee:transform doc:name="Transform Message" doc:id="483d65c7-4fe5-4f4f-8015-36a7bb76cf74" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[ %dw 2.0
+output application/xml
+---
+{
+	college: {
+		"text()": payload replace "lt" with "l",
+		res: payload replace 'lt' with "",
+		name: null
+	}
+}
+      
+     
+ ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="cdataFlow5" doc:id="97280f5c-a7c3-4e5a-ae2b-1c10d937be36" >
+		<http:listener doc:name="Listener" doc:id="b4c79fc8-de60-4323-93bc-c36c87157a32" config-ref="HTTP_Listener_config" path="/string6"/>
+		<ee:transform doc:name="Transform Message" doc:id="685bc067-0316-4137-a60a-d598df4b0c2f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+write(payload.^raw as String)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="5fe33b2e-62ef-4d2f-9c53-7b74044baca9" message="#[payload]"/>
+	</flow>
+	<flow name="cdataFlow6" doc:id="e05858d4-f279-4e93-a1fe-cbeb080d78b3" >
+		<http:listener doc:name="Listener" doc:id="33144671-685c-41fa-b4ef-597786898797" config-ref="HTTP_Listener_config" path="/string7"/>
+		<ee:transform doc:name="Transform Message" doc:id="71ea4ede-5f58-4ecf-934c-830f1f15beec" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output text/plain
+---
+
+	write(payload.^raw as String replace /([\-\,\n\t])/ with "")
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="11d4ee6b-e072-450f-baed-b3440b31136e" message="#[payload as String]"/>
+	</flow>
+	<flow name="cdataFlow7" doc:id="ed1937cc-323b-4e5c-a19b-edf1b8e4eeda" >
+		<http:listener doc:name="Listener" doc:id="53b0b653-a958-4393-b5ce-008256288d17" config-ref="HTTP_Listener_config" path="/string8"/>
+		<set-variable value='#[[]]' doc:name="Set Variable" doc:id="88dac958-184b-4393-b148-4d879f6ab608" variableName="acc"/>
+		<ee:transform doc:name="Transform Message" doc:id="35bfacf1-3b26-46b2-9aa0-f946b70ba84f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Each" doc:id="4a92974d-194b-415c-8753-499b0e4e10e1" >
+			<logger level="INFO" doc:name="Logger" doc:id="f1058e7c-1cdf-49c0-9e0c-6ab0872e3edb" message="#[payload]" />
+			<set-variable value='#[vars.acc  ++ [payload]]' doc:name="Set Variable" doc:id="fd87e8d9-0087-41fe-bb94-38c4755620fb" variableName="acc" />
+		</foreach>
+		<logger level="INFO" doc:name="Logger" doc:id="6ae75a06-4bdc-4668-a2bf-235962c0a2f5" message="#[vars.acc]" />
+	</flow>
+	<flow name="cdataFlow8" doc:id="5881d103-8cd1-4856-8fef-09cc2a34c048" >
+		<http:listener doc:name="Listener" doc:id="258109af-ce5c-4861-8437-24664e22e7ea" config-ref="HTTP_Listener_config" path="/pluck"/>
+		<logger level="INFO" doc:name="Logger" doc:id="a7b95ef4-c16e-44ca-9011-b0ea2db9a671" message="#[vars.key]"/>
+		<ee:transform doc:name="Transform Message" doc:id="9af26240-e0b4-4dcb-9c1f-d6a426bbb9da" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.pld pluck({
+	value:$,
+	key:$$,
+	index:$$$
+})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="09e5fb95-910c-4105-8550-235a1b6302b0" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="5793b096-3ceb-41de-a735-bdf0fa10bb2f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload orderBy($.key) ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="c45c885b-6533-4f67-a4e4-ab5aa7a21722" message="#[payload]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="b97274c6-b36d-42f0-8fca-d46c595bdf25" message="#[payload.res]"/>
+		<ee:transform doc:name="Transform Message" doc:id="f4fae4ce-0478-45d9-8637-b8243031aeef">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload.res orderBy($.name)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="cdataFlow9" doc:id="5cb44dbb-ac51-4e3d-916c-5561ab269d2b" >
+		<http:listener doc:name="Listener" doc:id="94553f50-bcab-4294-9cc5-ad3d5a6de3be" config-ref="HTTP_Listener_config" path="array2obj"/>
+		<set-variable value="#[attributes.queryParams['key']]" doc:name="Set Variable" doc:id="95228e38-80fe-435e-a58b-99d1c6320c55" variableName="arr" />
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="c126319e-1190-4ea1-8d49-8b0a22299f44" variableName="pld"/>
+		<logger level="INFO" doc:name="Logger" doc:id="a2514750-3ac4-4a40-b486-6767eb58798d" message="#[vars.arr]"/>
+		<ee:transform doc:name="Transform Message" doc:id="4cd4b809-4efa-4430-9caf-d8b6b0eb4e19" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var in2=vars.pld
+ var arr = vars.arr
+---
+in2 map (item) -> {
+	 (item filterObject ((value, key) -> (arr contains key as String default "") ))
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="9eee6ac2-0801-4001-b698-00f4c86c7bf0" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="c60eed78-89e4-4dd1-a56b-064477820eb4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{(payload map $)}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="ca8e0d25-7314-4ec2-8aee-6ddb2f814906" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload mapObject{
+	value:$
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="85a0fe04-c6bf-4965-a516-3243e225e13c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload orderBy(payload.value)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="171bc9f4-744c-44ac-8e23-9b4c2dd6768b" message="#[payload]" />
+	</flow>
+
+</mule>

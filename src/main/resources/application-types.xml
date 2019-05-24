@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="ex3" format="xml">
+      <types:example format="xml" element="college" location="ex3.xml"/>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#483d65c7-4fe5-4f4f-8015-36a7bb76cf74">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="ex3"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>
